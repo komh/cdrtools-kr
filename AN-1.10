@@ -1,0 +1,679 @@
+NEW features of cdrtools-1.10:
+
+Late changes:
+
+-	Workaround for a Linux bug in ide-scsi. This bug appeared
+	newly on Linux-2.4 with the sg ioctl() interface and caused
+	cdrecord not to be able to see the reason for a failed SCSI
+	command as the SCSI status byte always was 0.
+
+-	libscg now correctly behaves in delayed error printing mode.
+	The verbose level now is honored.
+
+-	The RSCSI server daemon used to ignore the timeout send from
+	the remote client. 
+	Thanks to  egor duda <deo@logos-m.ru>
+
+-	cdrecord now is silent while fixating on a MITSUMI CR-4802TE
+	There was a superluous  scgp->silent--; which forced
+	silent to become negative.
+
+-	cdrecord now waits 240 seconds for the drive to become ready
+	after issuing a blank command. This allows cdrecord to work
+	properly with drives like the MITSUMI CR-4802TE (which returns
+	early from the blank command). Cdrecord now waits long enough
+	so the drive is really ready from a blank=fast.
+
+-	Mkisofs now clears all allocated memory before use to avoid
+	core dumps from uninitlized parts of structures.
+
+All:
+
+-	Autoconf check for Gygwin-B20 vs. Cygwin-1.x
+	Now all commands should compile on both versions of Cygwin
+
+-	************************
+	Should change all programs to test for IS_CYGWIN and IS_CYGWIN_1
+	in future because Cygwin is going to chang macros from __CYGWIN32__
+	to __CYGWIN__ in future.
+	************************
+
+-	Rules for HP-9000-800
+
+-	Better autoconf for HP-UX
+
+-	Checked and corrected format strings for printf like functions.
+	This makes 64 bit support more correct.
+
+-	include files updated to support C++ compiling
+
+-	README.compile updated
+
+-	Remove target before trying to install a hardlink.
+	This allows to replace old mkhybrid versions by the new
+	unified mkisofs hard link.
+
+-	printf %p format for 64 bit architectures corrected.
+
+-	New changes to update the VMS support
+
+-	VMS now supports ATAPI
+	(Thanks to  Eberhard Heuser-Hofmann <vaxinf@CHCLU.CHEMIE.UNI-KONSTANZ.DE>)
+
+-	Libscg OS part for SunOS now compiles correctly even on SunOS-4.x
+
+-	Makerule support for Win98 ME
+
+-	Makerule support for Win NT-5.0 aka w2000
+
+-	changed rules1.dir to circumvent a bug in bash-2.01
+
+-	README.os2 gives a hint to the Joliet bug on OS/2
+
+-	README.multi now has a hint about problems with multi-session
+	and Joliet
+
+-	Allow ENOTTY as indicator for an illegal ioctl(). In case
+	somebody from the Linux kernel team learns that the correct
+	errno for an illegal ioctl is ENOTTY instead of EINVAL.
+	This would allow libscg to switch back to the non-ioctl
+	version of the interface in this case.
+
+-	Large file support for all tools except cdda2wav
+
+-	*************** General Large File Notes ********************
+	If you have problems with compiling the large file aware programs
+	on your OS, look for all files called Makefile or '*.mk' and
+	remove the lines that contain:
+
+	CPPOPTS +=      -DUSE_LARGEFILES
+
+	*************************************************************
+
+-	getargs() now supports long long parameters (needed for large files).
+
+-	First Apollo Domain/OS Rules
+
+-	Support for broken usleep() on Apollo Domain/OS
+
+-	Support for GCC on IRIX
+
+-	Suport for Lint on Solaris
+
+-	Try to fix a bug in ieeefp.h on True64 do to a hint from
+	Bert De Knuydt <Bert.Deknuydt@esat.kuleuven.ac.be>
+	to make fconv.c work on True64
+
+-	First support for Mac OS X (Darwin variant)
+	This is the MAC OX X version that uses the new mach kernel and has
+	no user SCSI support
+
+-	Autoconf Support for the changed __dtoa() interface in new FreeBSD
+
+-	Autoconf Support for __filbuf() vs. _filbuf() in USG STDIO
+
+-	Added support for latest GCC on Cygwin
+
+-	Added support for Win ME & Cygwin
+
+-	install-sh now does not complain anymore about chown problems
+	on Cygwin with Win9x
+
+	The .EXE problem still is not completely colved. It
+	is a makefile problem.
+
+-	New Architectures: mips-linux-cc.rul mipsel-linux-cc.rul
+
+-	Unified options for libscg users: cdrecord, readcd, scgcheck, sformat
+
+	-version	print version information and exit
+	dev=target	SCSI target to use
+	debug=#,-d	Set to # or increment misc debug level
+	kdebug=#,kd=#	do Kernel debugging
+	timeout=#	set the default SCSI command timeout to #.;
+	-verbose,-v	increment general verbose level by one
+	-Verbose,-V	increment SCSI command transport verbose level by one
+	-silent,-s	do not print status of failed SCSI commands
+
+-	Support for new DEC Alpha processor types in config.sub.
+
+-	install-sh now does not print a junk line when installing as root
+
+-	AIX Rules fixed
+
+-	Fixed a typo in xconfig.h.in that caused that time.h was never included.
+
+Libscg:
+
+-	libscg restrucured for a unified naming scheme and better management
+	of error messages.
+
+	-	All references to printf()/fprintf()/sprintf() removed
+		We definitely need js_*printf() and like to avoid programs
+		to be forced to include two different printf implementations.
+
+	-	libscg now primarily writes to a string instead of a mix of
+		stdout/stderr for error reporting.
+
+		The new standard behaviour is to write the error text to
+		stderr to the end of each SCSI command. This can be supressed
+		by setting the SCSI error File ptr to NULL.
+
+	-	New functions serrmsg()/serrmsgno() complete the
+		set of error reporting functions in libschily.
+
+	-	reset from libscg now distinguishes between Bus reset
+		and target reset.
+
+	-	Trying to limit the needed include files in
+		scsitranp.c and scsihack.c so potential name space
+		conflicts with the low level transport code are
+		limited.
+
+		Many OS are not supplying clean SCSI include files.
+		They automatically include completely unnecessary definitions
+		for a low level transport. For this reason, there is a high
+		potential for name space conflicts with the high level
+		definitions of libscg.
+
+	-	OS dependaent low level SCSI transport code now is completely
+		separated from the upper layers.
+
+		This makes it possible to select between different
+		transport implementations at runtime.
+		Note that this feature is used with SCG/USCSI code
+		for Solaris because use of both transport implementations
+		is completely disjunct. It is not used for Linux sg/pg
+		transport because SCSI bus scanning spans both tansports.
+
+	-	SCSI address data now is completely encapsulated. 
+
+	-	scg_havebus() routine made consistent for several OS.
+
+	-	Remote-SCSI (SCSI Anywhere) protocol added in librscg
+
+		Note that remote SCSI is also a good method for
+		formal (experimental) verification of the libscg interface.
+		A remote transport implementation may only implement
+		known "official" features of a library interface.
+		The fact that rscsi now works for 4 weeks helped me to fix
+		several small problems in the interface. Since about a
+		week, no problem has been observed.
+
+	-	libscg/scsi-linux-sg.c now returns version information for
+		pg driver if apropriate.
+
+
+-	Check for HAVE_BSD_DEV_SCSIREG_H on Mac OS X to make sure that 
+	libscg compiles (witout SCSI support) on Darwin.
+	Note that Darwin no more has SCSI user transport support.
+
+-	As UnixWare 7.1.1 doesn't allow to open the passthrough
+	interface for disks, this is disabled by default. 
+	cdrecord -scanbus will therefore only list devices other
+	than disks. To enable the scanning of disks, you need to
+	set an environment variable "LIBSCG_SCAN_ALL".
+      
+	Be warned, doing so might lock your disk subsystem!
+
+-	Changed MKNOD.hpux to support 15 SCSI busses
+
+-	Detect DMA overrun with Linux Parallel port ATAPI
+
+-	Return Linux sg kernel driver version with scgo_version(scgp, what)
+
+-	Corrected error behaviour for Linux sg driver interface
+
+-	Corrected error behaviour for Sun USCSI driver interface
+
+-	New libsc interface functions scg_vhead()/scg_vtail()/scg_verbose()
+	scg_getdmacnt()/scg_errfflush() to make libscg more flexible
+
+-	Now all failed SCSI commands (not in silent mode) print
+	the SCSI timings. This makes it easier to understand why
+	a command has been aborted with a reset.
+
+-	Raised libscg version to 0.5
+
+Rscsi:
+
+-	This is the first external release of the Remote-SCSI protocol
+	which gives you SCSI-Anywhere features.
+
+There are three possible ways to control access to the remote users:
+
+	-	Let the remote scsi lib log in as a standard user.
+		In this case rscsi will be called via sh -c /opt/schily/sbin/rscsi
+		NOTE: In this case, rscsi must be installed suid root. 
+		--- This would need to allow any valid local user to access SCSI ----
+		It could be a security problem.
+
+	-	Log in as root and call rscsi via sh -c /opt/schily/sbin/rscsi
+		NOTE that this will fore you to allow remote logins as root
+		which is considered to be a security hole.
+
+	-	Create one or more special user(s) that have /opt/schily/sbin/rscsi
+		as login shell with their own home directory.
+		You then may create special .rhost files for each user.
+		NOTE: In this case, rscsi must be installed suid root. 
+		**** This is the preferred method ****
+
+To enable remote SCSI via the login shell method you should do the following:
+
+	-	Add an entry to /etc/passwd in the form:
+
+		rscsi:x:1999:1000:Tape:/export/home/rscsi:/opt/schily/sbin/rscsi
+
+		(modify this according to your OS). And don't forget to
+		modify /etc/shadow the way it needs to be on your OS.
+
+	-	Create a  home directory for this user and add a .rhosts file
+		to allow access to all users you like.
+
+	-	Install rscsi suid root into /opt/schily/sbin
+
+	-	Install a file /etc/default/rscsi and define access rights.
+		Without this file, rscsi will not work at all.
+
+		The template for this file is: rscsi/rscsi.dfl
+
+RSCSI Security:
+
+-	When rscsi starts, it checks if /etc/default/rscsi exists.
+	If not, it dies.
+
+-	If rscsi is not called by a user listed in /etc/default/rscsi
+	it dies.
+
+-	To acess a SCSI target there must be an entry that lists the user
+	rcsi hast been started from, the hostname and the SCSI target.
+
+	rscsi compares the hostname field in /etc/default/rscsi 
+	to the peername retrived from STDIN:
+
+	- legal host name		IP connection
+	- "ILLEGAL_SOCKET"		Not an IP socket
+	- "NOT_IP"			Not a socket
+
+RSCSI Security hints:
+
+-	Do not generally allow other users to see your boot disk via RSCSI.
+	All people who see this disk may edit yhour passwd file.
+
+-	If you are in doubt, only export CD-ROM drives, scanners and similar
+	devices that are not directly security sensitive.
+
+If anybody sees a security hole in my security precautions, plese send me a mail!
+
+RSCSI usage:
+
+-	To use remote SCSI devices you need to know how to access a specific remote
+	SCSI target.
+
+	-	dev=REMOTE:host: or dev=REMOTE:host
+		will allow you to do SCSI bus scanning while you log in as yourself
+
+	-	dev=REMOTE:user@host: or dev=REMOTE:user@host
+		will allow you to do SCSI bus scanning while you log in as "user"
+
+		If you use the setup described above, you should use:
+
+			dev=REMOTE:rscsi@babbel:
+
+		to do SCSI Bus scanning on host babbel
+
+	-	To access a specific SCSI device, you must specify
+		dev=REMOTE:host:<target spec> or dev=REMOTE:user@host:<target spec>
+		<target spec> is the SCSI target specification as it is needed
+		on the remote host
+
+			dev=REMOTE:rscsi@babbel:1,3,0
+
+		Will let you log in as rscsi on host babbel and open Target 3 lun 0
+		on SCSI bus #1
+
+	-	If you use cdrecord -vv ...., cdrecord will on startup print some 
+		information about the remote libscg version used for the connection.
+
+-	To be able to use the remote SCSI client code from win32 you need to create
+	a file /etc/passwd with a corect entry for the user you are on win32.
+	Call 'id' to get the right user id.
+	Note that remote SCSI has not yet been tested on Win32.
+
+RSCSI speed:
+
+-	On a Ultra-10 running Solaris 8, the command overhead time is 400 usec.
+	You may achieve up to 9900 kB/s via a 100MB/s ethernet connection
+	bewteen two of such machines.
+
+-	With 100 MB/s, 12x recording should be no problem.
+
+-	With 10 MB/s, 4x recording is the maximum. Do tests before!
+
+-	Logging into a remote machine and running cdrecord on the remote machine
+	causes the buffer cache on that machine to be trashed. The main user
+	is disturbed.
+
+-	Doing cdrecording via Remote SCSI causes only the rscsi command with less
+	than 200kB to be needed on the remote machine hosting the CD recorder.
+	The main user on that machine is not disturbed.
+	The buffer cache of the machine running cdrecord is trashed.
+
+-	It is desirable to use a Burn-Proof recorder to make sure that network
+	load will not cause buffer underruns.
+
+
+-	USER= test and test for hostname are using a pattern matcher.
+
+Cdrecord:
+
+-	Now first tries to reset the target and then does a SCSI Bus 
+	device reset.
+
+-	Hack for a mysterioys drive ....
+		Device type    : Removable CD-ROM 
+	Version        : 0 
+	Response Format: 1 
+	Vendor_info    : 'RWD     ' 
+	Identifikation : 'RW2224          ' 
+	Revision       : '2.53' 
+	Device seems to be: Generic mmc CD-RW. 
+
+	which seem to have some OPC problems.
+
+-	Fixed a bug in drv_mmc.c that caused cdrecord to core dump if a drive
+	returns speed == 0
+
+-	Add several workarounds for ATAPI firmare found e.g. in Iomega Zip USB
+	drives and possibly many other other system based on the same OEM system.
+
+	-	Add a workaround for a bug in the mode sense implementation
+		in IOMEGA ATAPI firmware. The drive sends too many bytes 
+		if a program reqests less than 4 bytes with a 10 byte mode sense
+		command. This causes a DMA overrun which may only be cured by
+		a reset (at least if the drive is connected via a ATAPI/USB bridge).
+		Note that the method cdrecord uses (and which causes the problem)
+		is explicitly noted as the official method to find out whether a
+		drive supports a certain mode page.
+
+	NOTE:	To get USB drives working on Linux, you should know that USB-SCSI
+		support on Linux-2.4test8 is buggy and for this reason too old.
+		You need usb-storage.c from 4.10.2000 or newer.
+
+		To check if your kernel is OK, issue a cdrecord -toc dev=....
+		with no mdia loaded. If the output looks like this:
+
+		cdrecord: I/O error. test unit ready: scsi sendcmd: no error
+		CDB:  00 00 00 00 00 00
+		status: 0x2 (CHECK CONDITION)
+		Sense Bytes: 70 00 02 00 00 00 00 0A 00 00 00 00 3A 01 00 00 00 00
+		Sense Key: 0x2 Not Ready, Segment 0
+		Sense Code: 0x3A Qual 0x01 (medium not present - tray closed) Fru 0x0
+		Sense flags: Blk 0 (not valid) 
+		cdrecord: No disk / Wrong disk!
+
+		your kernel is OK, if you only see the last line, you should run cdrecord -V
+		and check for the SCSI error messages.
+		If you see:
+
+				status: 0x1 (GOOD STATUS)
+		instead of
+				status: 0x2 (CHECK CONDITION)
+
+		you have a buggy USB-SCSI driver.
+
+
+-	Map PIONEER CD-WO DR-R504X to DEV_PIONEER_DW_S114X according to a
+	hint from philip@merge.com
+
+-	Change sample macro to ssample in cdrecord.h 
+	to make compilation on Cygwin-1.x easier
+
+-	Try to deal with the new include file structure of Cygwin-1.x
+
+-	Impelemented workaround for a firmware bug in ACER drives:
+
+	The ACER drive:
+		Vendor_info    : 'ATAPI   '
+		Identifikation : 'CD-R/RW 8X4X32  '
+		Revision       : '5.EW'
+		Will not return from -dummy to non-dummy without
+		opening the tray.
+
+	This caused cdrecord to write all disks in -dummy mode if
+	used ith this drive.
+
+	The drive above seems to be a widly used OEM drive so this is an
+	important change.
+
+-	Updated README.multi
+
+-	Finnaly we got working support for the Plasmon RF 4100
+	Thanks to Joerg Wunsch
+
+-	Try to support mmap() on Apollo
+
+-	Autoconf tests for sys/shm.h & sys/ipc.h needed for Apollo
+	to avoid to use SvsV shared mem in BSD compile environment
+
+-	New Schily SING include file mmapdefs.h
+
+-	Now prints a hint about cdrecord-ProDVD if cdrecord encounters
+	a DVD-R drive but there is no DVD-R support compiled in.
+
+-	Reverse security counter (before burning) now shows the right time.
+
+-	Fixed a bug in modes.c that caused cdrecord to remain silent if
+	a mode sende failed.
+
+Cdda2wav:
+
+-	CD-Text disabled for SONY    CD-RW  CRX100E  1.0
+	This has been done from the hint of an owner and looks
+	questionable.
+
+-	Support for TOC of DVD-audio (M/S/F overflow).
+
+-	Added new mmap() definitions for Apollo to make it compile
+
+Readcd:
+
+-	compiles again on K&R compilers
+
+-	readcd now by defult truncates the output file
+
+-	New option -notrunc to get the old behaviour
+
+-	Avoid core dumps from division by zero if read time == 0
+
+-	split read_capacity() into read_capacity() and print_capacity()
+	to make finally sure that readcd will not print to stdout
+
+Scgcheck:
+
+-	New program to validate libscg interface
+	Please test your OS for conformance.
+
+Mkisofs:
+
+-	Fixed a bug with graft dirs
+	-graft-points will now correctly work with filenames that have all
+	'=' chars escaped.
+
+-	Patch from James Pearson: discard Newline in list files only if really
+	present.
+
+-	add a warning when Joliet extensions are used without Rock Ridge
+
+-	Man Page corrected regarding CDextra & -graft-points
+
+-	According to a report, Cygwin-1.x translates filenames to ISO-8859-x
+	mkisofs now also defaults to iso8859-1 mapping on Cygwin-1.x instead
+	of "cp437"
+
+-	New option -no-pad
+
+-	Now default to create padding on the ISO output image
+
+-	Disabled old (Eric style) UNIX backup special handling of
+	the characters '#' and '~'. This code created completely
+	unreadable ISO images with an endless directory loop.
+
+-	Print an easy to parse string to stdout when called with
+	-print-size
+
+	Now the following simple shell script will work:
+
+	cdblocks=` mkisofs -print-size ... 2>/dev/null `
+	mkisofs ... | cdrecord ... tsize=${cdblocks}s -
+
+-	mkisofs now also compiles without -DUSE_LIBSCG
+
+-	Include File structure completely rewritten.
+	The old portability code from Eric now has been completely removed
+	and replaced by reusable code snipplets in suportable incude files.
+	This makes portability finally clean and is needed to add largefile
+	support in the near future.
+
+-	More flexible options for rationalized id's/permissions
+	from "E. Jay Berkenbilt" <ejb@apexinc.com>
+
+	Specifically, the following options have been added:
+
+	  -uid            specifies the uid of the owner of all files
+	  -gid            specifies the gid of the owner of all files
+	  -file-mode      specifies the mode for files
+	  -dir-mode       specifies the mode for directories
+	  -new-dir-mode   specifies the mode for directories "invented" by mkisofs
+
+	Modes are given in the usual format as octal numbers.
+
+	Each of the -uid, -gid, -file-mode, and -dir-mode options imply Rock
+	Ridge extensions.  It works to use them with -R, -r, or neither.
+
+-	libhfs_iso now corrected a comparison between unsigned and < 0
+
+-	libhfs_iso now sets the HFS fileattributes ro read olny
+	Thanks to James Pearson.
+
+-	Support for Apple character codings. Thanks to James Pearson.
+
+-	Man Page rewritten to make the problem with code sets easier
+	to understand. Note that most of the problems with
+	character codings would not be present if Microsoft
+	would not use UTF-16 Unicode coding which does not
+	comply to POSIX
+
+-	-quiet now makes mkisofs really quiet.
+
+-	make libfile a cleaner library
+
+-	Changed option parsing to allow EBCDIC commandline codes
+
+-	Change from a hint according to James Pearson to make --xinet option work
+
+-	libfile now should compile on AIX & Apollo Domain OS
+
+-	Fixed a bug triggered by adding Sparc boot.
+	This caused a endless loop if padding was specified (which
+	is now default).
+	The code from Eric did not support to install an output
+	filter (like the pad filter) more than once.
+
+-	libfile has been converted to use the portabel Schily SING
+	include file concept
+
+-	libfile now uses a new file utimdefs.h for utime() definitions
+	This was needed to support Apollo Domain/OD
+
+-	Fixed a bug with mkisofs .... -- -filename
+	Thanks to Jonas Munsin <jmunsin@iki.fi>
+
+-	Introduced a workaround for a problem with mkisofs running on Cygwin.
+	Thanks to a hint (from Jakob Bøhm  jb@danware.dk) that helped to
+	find the workaround for the problem with wrong file content.
+
+	If there were many files ( > ~4000 ) in the tree that should go to CD,
+	one or two file contained the wrong content. It turnes out that this is
+	caused by the fact that Microsoft is not POSIX and does not have
+	unique inode numbers for each file.
+
+	The workaround introduces two new options:
+
+	-cache-inodes	(default on UNIX)
+
+	-no-cache-inodes (default on Cygwin)
+
+-	New options -hfs-unlock/-hfs-bless from James Pearson
+	used to help people who like to mount R/W and modify HFS partitions
+	created by mkisofs.
+
+-	New option -check-session as a high level option for
+
+		mkisofs -check-ondnames -C0,0 -M
+
+-	ISO-9660 naming routine fixed. It did not handle filenames correctly that
+	ended with a '.'.
+
+-	mkisofs now correctly checks for the presence or Rock Ridge attributes
+	when doing multi-session (SUSP record in '.' entry for root).
+
+-	New Option -force-rr to overwrite automatic RR recognition.
+
+-	isoinfo program now checks for Joliet and Rock Ridge when called
+	with -d option.
+
+-	isoinfo now checks for High Sierra Filesystems too.
+
+-	New README.joliet
+
+-	Added Copyright notice to Appl ID
+
+-	Make warning nonfatal (no call to exit())
+
+-	Trying to make associated files behave better in multi-session mode
+
+-	From a hint from James Pearson
+	make insert_file_entry() failure non fatal in mkisofs main code
+
+TODO:
+	-	read Joliet filenames with multi-session if no TRANS.TBL
+		or RR is present. I am looking for a volouteer for this task:
+		Peter Berendi <berendi2@webdesign.hu> announced that he likes
+		to be the volounteer for this task.
+
+		Unfortunately, I did no hear again from him, but I got
+		a proposal from
+		"Krisztian Gede" <nameless@mail.datanet.hu>
+		who also likes to do the job.
+
+		Note that this can never 100% correctly as there is no relation
+		between the names on the master filesystem, the ISO-9660 names
+		and the Joliet names. Only the Rock Ridge names are untranslated
+		with respect to the origina files on the master filesystem.
+
+	-	implement Yellow book compliant XA extended dir attributes
+
+	-	add libecc/edc for CDI and similar.
+
+	-	add UDF support
+
+CYGWIN NT-4.0 NOTES:
+
+To compile on Cygwin32, get Cygwin and install it.
+For more information read README.win32
+
+The files are located on:
+
+ftp://ftp.fokus.gmd.de/pub/unix/cdrecord/alpha ...
+
+NOTE:	These tar archives are 100% ansi compatible. Solaris 2.x tar and GNU
+	tar may get some minor trouble.
+
+WARNING: Do not use 'mc' to extract the tar file!
+	All mc versions before 4.0.14 cannot extract symbolic links correctly.
+
+WARNING: Do not use 'winzip' to extract the tar file!
+	Winzip cannot extract symbolic links correctly.
+
+Joerg

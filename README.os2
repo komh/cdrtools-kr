@@ -1,0 +1,9 @@
+Note that the Joliet implementation on OS/2 is buggy:
+
+It expects the file in the directories in the wrong order.
+While Microsoft wants the files to be in ASCII (binary) order,
+OS/2 likes to have the files in lexical order (uppercase and
+lowercase together). This makes CD's with Joliet attributes
+unreadable on OS/2 if there are files that start the same way
+but differ in case.
+

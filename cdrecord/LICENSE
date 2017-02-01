@@ -1,0 +1,12 @@
+This software is under GPL with the following limitations:
+
+
+-	You may not modify certain copyright messages in cdrecord.c
+
+	See cdrecord.c for further information.
+
+
+-	You may (with a few exceptions) not modify the location of the
+	configuration file /etc/default/cdrecord.
+
+	See defaults.c for further information.
