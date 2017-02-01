@@ -42,7 +42,9 @@ struct nls_unicode {
 struct nls_table {
 	char *charset;
 	unsigned char **page_uni2charset;
+    unsigned short **page_uni2wcharset;
 	struct nls_unicode *charset2uni;
+    unsigned short **page_wcharset2uni;
 
 	void (*inc_use_count) 	__PR((void));
 	void (*dec_use_count) 	__PR((void));

@@ -18,7 +18,8 @@ CFILES=	nls_base.c \
 	nls_cp866.c \
 	nls_cp869.c \
 	nls_cp874.c \
-	nls_cp1250.c \
+    nls_cp949.c \
+    nls_cp1250.c \
 	nls_cp1251.c \
 	nls_iso8859-1.c \
 	nls_iso8859-2.c \
@@ -33,6 +34,7 @@ CFILES=	nls_base.c \
 	nls_iso8859-15.c \
 	nls_koi8-r.c \
 	nls_koi8-u.c \
+    nls_euc-kr.c \
 	nls_cp10000.c \
 	nls_cp10006.c \
 	nls_cp10007.c \

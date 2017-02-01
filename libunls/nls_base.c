@@ -285,7 +285,9 @@ dec_use_count()
 static struct nls_table default_table = {
 	"default",
 	page_uni2charset,
+    NULL,
 	charset2uni,
+    NULL,
 	inc_use_count,
 	dec_use_count,
 	NULL

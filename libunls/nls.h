@@ -49,6 +49,7 @@
 #define CONFIG_NLS_CODEPAGE_866
 #define CONFIG_NLS_CODEPAGE_869
 #define CONFIG_NLS_CODEPAGE_874
+#define CONFIG_NLS_CODEPAGE_949
 #define CONFIG_NLS_CODEPAGE_1250
 #define CONFIG_NLS_CODEPAGE_1251
 #define CONFIG_NLS_ISO8859_1
@@ -64,6 +65,7 @@
 #define CONFIG_NLS_ISO8859_15
 #define CONFIG_NLS_KOI8_R
 #define CONFIG_NLS_KOI8_U
+#define CONFIG_NLS_EUC_KR
 
 #define CONFIG_NLS_CODEPAGE_10000
 #define CONFIG_NLS_CODEPAGE_10006
@@ -99,10 +101,12 @@ extern int init_nls_cp865	__PR((void));
 extern int init_nls_cp866	__PR((void));
 extern int init_nls_cp869	__PR((void));
 extern int init_nls_cp874	__PR((void));
-extern int init_nls_cp1250	__PR((void));
+extern int init_nls_cp949   __PR((void));
+extern int init_nls_cp1250  __PR((void));
 extern int init_nls_cp1251	__PR((void));
 extern int init_nls_koi8_r	__PR((void));
 extern int init_nls_koi8_u	__PR((void));
+extern int init_nls_euc_kr  __PR((void));
 
 extern int init_nls_cp10000	__PR((void));
 extern int init_nls_cp10006	__PR((void));

@@ -82,6 +82,7 @@ init_nls_file(filename)
 	FILE	*fp;
 	struct nls_unicode *charset2uni = NULL;
 	unsigned char **page_uni2charset = NULL;
+
 	char	buf[1024];
 	char	*p;
 	unsigned int	cp, uc;
@@ -190,7 +191,9 @@ init_nls_file(filename)
 	/* give the table the file name, so we can find it again if needed */
 	table->charset = strdup(filename);
 	table->page_uni2charset = page_uni2charset;
+    table->page_uni2wcharset = NULL;
 	table->charset2uni = charset2uni;
+    table->page_wcharset2uni = NULL;
 	table->inc_use_count = inc_use_count;
 	table->dec_use_count = dec_use_count;
 	table->next = NULL;

@@ -433,8 +433,10 @@ dec_use_count()
 static struct nls_table table = {
 	"cp863",
 	page_uni2charset,
-	charset2uni,
-	inc_use_count,
+    NULL,
+    charset2uni,
+    NULL,
+    inc_use_count,
 	dec_use_count,
 	NULL
 };

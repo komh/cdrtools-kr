@@ -115,6 +115,9 @@ init_nls()
 #ifdef CONFIG_NLS_CODEPAGE_874
 	init_nls_cp874();
 #endif
+#ifdef CONFIG_NLS_CODEPAGE_949
+    init_nls_cp949();
+#endif
 #ifdef CONFIG_NLS_CODEPAGE_1250
 	init_nls_cp1250();
 #endif
@@ -126,6 +129,9 @@ init_nls()
 #endif
 #ifdef CONFIG_NLS_KOI8_U
 	init_nls_koi8_u();
+#endif
+#ifdef CONFIG_NLS_EUC_KR
+    init_nls_euc_kr();
 #endif
 #ifdef CONFIG_NLS_CODEPAGE_10000
 	init_nls_cp10000();

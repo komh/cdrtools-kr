@@ -102,11 +102,11 @@ static	char	ucs_codes[] = {
 };	
 
 #ifdef	UDF
-	void	convert_to_unicode	__PR((unsigned char *buffer,
+    void   convert_to_unicode  __PR((unsigned char *buffer,
 		int size, char *source, struct nls_table *inls));
 	int	joliet_strlen		__PR((const char *string));
 #else
-static void	convert_to_unicode	__PR((unsigned char *buffer,
+static void convert_to_unicode  __PR((unsigned char *buffer,
 		int size, char *source, struct nls_table *inls));
 static int	joliet_strlen		__PR((const char *string));
 #endif
@@ -139,39 +139,39 @@ static int	jpathtab_size		__PR((int starting_extent));
  *
  */
 #ifdef	PROTOTYPES
-unsigned char 
+unsigned char
 conv_charset(unsigned char c,
 	struct nls_table *inls,
 	struct nls_table *onls)
 #else
-unsigned char 
+unsigned char
 conv_charset(c, inls, onls)
-	unsigned char c;
+    unsigned char c;
 	struct nls_table *inls;
 	struct nls_table *onls;
 #endif
 {
 	unsigned char uh,
 		      ul,
-		      uc,
-		      *up;
+              uc,
+              *up;
 
 	/* if we have a null mapping, just return the input character */
 	if (inls == onls)
 		return c;
 
-	/* get high and low UNICODE bytes */
-	uh = inls->charset2uni[c].uni2;
-	ul = inls->charset2uni[c].uni1;
+    /* get high and low UNICODE bytes */
+    uh = inls->charset2uni[c].uni2;
+    ul = inls->charset2uni[c].uni1;
 
-	/* get the backconverted page from the output charset */
-	up = onls->page_uni2charset[uh];
+    /* get the backconverted page from the output charset */
+    up = onls->page_uni2charset[uh];
 
-	/* if the page exists, get the backconverted character */
-	if (up == NULL)
-		uc = '\0';
-	else
-		uc = up[ul];
+    /* if the page exists, get the backconverted character */
+    if (up == NULL)
+        uc = '\0';
+    else
+        uc = up[ul];
 
 	/* return the backconverted, if it's not NULL */
 	return (uc ? uc : '_');
@@ -193,7 +193,7 @@ static void
 convert_to_unicode(buffer, size, source, inls)
 	unsigned char	*buffer;
 	int		size;
-	char		*source;
+    char    *source;
 	struct nls_table *inls;
 {
 	unsigned char	*tmpbuf;
@@ -203,6 +203,7 @@ convert_to_unicode(buffer, size, source, inls)
 			ul,
 			uc,
 			*up;
+    unsigned short *wp;
 
 	/*
 	 * If we get a NULL pointer for the source, it means we have an
@@ -229,39 +230,55 @@ convert_to_unicode(buffer, size, source, inls)
 		 */
 		uc = tmpbuf[j];			/* temporary copy */
 		if (uc != '\0') {		/* must be converted */
-			uh = inls->charset2uni[uc].uni2;	/* convert forward:
-							   hibyte...	     */
-			ul = inls->charset2uni[uc].uni1;	/* ...lobyte	     */
-			up = inls->page_uni2charset[uh];	/* convert backward:
-							   page...	     */
-			if (up == NULL)
-				uc = '\0';	/* ...wrong unicode page     */
-			else
-				uc = up[ul];	/* backconverted character   */
-			if (uc != tmpbuf[j])
-				uc = '\0';	/* should be identical */
-			if (uc <= 0x1f || uc == 0x7f)
-				uc = '\0';	/* control char */
-			switch (uc) {		/* test special characters */
+            wp = inls->page_wcharset2uni ? inls->page_wcharset2uni[ uc ] : NULL;
+            if( wp && wp[ tmpbuf[ j + 1 ]]) /* for 2 bytes */
+            {
+                j++;
+                buffer[i] = wp[ tmpbuf[ j ]] >> 8; /* final UNICODE
+                                       conversion */
+                buffer[i + 1] = wp[ tmpbuf[ j ]] & 0x00ff;
+            }
+            else             /* for 1 bytes */
+            {
+                uh = inls->charset2uni[uc].uni2;    /* convert forward:
+                                   hibyte...         */
+                ul = inls->charset2uni[uc].uni1;    /* ...lobyte         */
+                up = inls->page_uni2charset[uh];    /* convert backward:
+                                   page...       */
+                if (up == NULL)
+                        uc = '\0';  /* ...wrong unicode page     */
+                else
+                        uc = up[ul];    /* backconverted character   */
+                if (uc != tmpbuf[j])
+                    uc = '\0';  /* should be identical */
+                if (uc <= 0x1f || uc == 0x7f)
+                    uc = '\0';  /* control char */
+                switch (uc) {       /* test special characters */
 
-			case '*':
-			case '/':
-			case ':':
-			case ';':
-			case '?':
-			case '\\':
-			case '\0':		/* illegal char mark */
-				/*
-				 * Even Joliet has some standards as to what is
-				 * allowed in a pathname. Pretty tame in
-				 * comparison to what DOS restricts you to.
-				 */
-				uc = '_';
-			}
-		}
-		buffer[i] = inls->charset2uni[uc].uni2;	/* final UNICODE
-							   conversion */
-		buffer[i + 1] = inls->charset2uni[uc].uni1;
+                case '*':
+                case '/':
+                case ':':
+                case ';':
+                case '?':
+                case '\\':
+                case '\0':      /* illegal char mark */
+                    /*
+                     * Even Joliet has some standards as to what is
+                     * allowed in a pathname. Pretty tame in
+                     * comparison to what DOS restricts you to.
+                     */
+                    uc = '_';
+                }
+                buffer[i] = inls->charset2uni[uc].uni2; /* final UNICODE
+                                       conversion */
+                buffer[i + 1] = inls->charset2uni[uc].uni1;
+            }
+        }
+        else
+        {
+            buffer[ i ] = 0;
+            buffer[ i + 1 ] = 0;
+        }
 	}
 
 	if (size & 1) {	/* beautification */
@@ -290,9 +307,15 @@ joliet_strlen(string)
 	const char	*string;
 {
 	int		rtn;
+    unsigned char *buffer;
 
-	rtn = strlen(string) << 1;
+    rtn = ( strlen(string) + 1 ) << 1;
 
+    buffer = e_malloc( rtn );
+    strcpy( buffer, string );
+    convert_to_unicode( buffer, rtn, NULL, in_nls );
+    for( rtn = 0; buffer[ rtn ] || buffer[ rtn + 1 ]; rtn += 2 );
+    free( buffer );
 	/*
 	 * We do clamp the maximum length of a Joliet string to be the
 	 * maximum path size.  This helps to ensure that we don't completely
